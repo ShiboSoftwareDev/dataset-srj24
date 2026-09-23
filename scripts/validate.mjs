@@ -3,7 +3,7 @@ import { createRequire } from "node:module"
 
 const require = createRequire(import.meta.url)
 const dataset = require("../index.js")
-const expectedSampleCount = 10
+const expectedSampleCount = 20
 
 const assert = (condition, message) => {
   if (!condition) throw new Error(message)
@@ -34,6 +34,8 @@ assert(repositoryLicense.includes("MIT License"), "Repository license is missing
 assert(repositoryLicense.includes("Apache License, Version 2.0"), "Repository license is missing the Apache-2.0 exception")
 
 let hasVeryHighComplexityBoard = false
+let hasTinyRoutingProblem = false
+const observedLayerCounts = new Set()
 
 for (const [index, source] of sourceFiles.entries()) {
   const exportName = `sample${String(index + 1).padStart(3, "0")}`
@@ -52,6 +54,11 @@ for (const [index, source] of sourceFiles.entries()) {
   assert(Array.isArray(sample.connections) && sample.connections.length > 0, `${exportName} missing connections`)
   assert(sample.bounds, `${exportName} missing bounds`)
   assert(sample.layerCount >= 2, `${exportName} has invalid layer count`)
+  observedLayerCounts.add(sample.layerCount)
+
+  if (source.stats.components <= 20 && sample.connections.length <= 20) {
+    hasTinyRoutingProblem = true
+  }
 
   assert(existsSync(circuitJsonPath), `${exportName} missing ${circuitJsonPath}`)
   assert(existsSync(kicadPcbPath), `${exportName} missing ${kicadPcbPath}`)
@@ -94,6 +101,11 @@ for (const [index, source] of sourceFiles.entries()) {
 }
 
 assert(hasVeryHighComplexityBoard, "Dataset is missing a very-high-complexity board")
+assert(hasTinyRoutingProblem, "Dataset is missing a compact low-complexity routing problem")
+assert(
+  [4, 6, 8].every((layerCount) => observedLayerCounts.has(layerCount)),
+  "Dataset must contain 4-, 6-, and 8-layer routing problems",
+)
 assert(Object.keys(dataset.dataset).length === expectedSampleCount, "Dataset export count is incorrect")
 
 console.log(`Validated ${expectedSampleCount} SRJ samples with pinned sources, licensing, and connectivity checks`)

@@ -1,7 +1,7 @@
 {
   "name": "@tscircuit/dataset-srj24",
-  "version": "0.0.1",
-  "description": "Simple Route JSON dataset from ten production-oriented KiCad boards",
+  "version": "0.0.2",
+  "description": "Simple Route JSON dataset from twenty production-oriented KiCad boards",
   "main": "index.js",
   "types": "index.d.ts",
   "files": [
